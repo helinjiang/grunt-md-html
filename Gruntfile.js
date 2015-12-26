@@ -67,15 +67,16 @@ module.exports = function (grunt) {
             },
             before_after_compile: {
                 options: {
-                    beforeCompile: function (mdContent) {
-                        return mdContent + '\r\n' + '## Hello grunt-md-html';
+                    beforeCompile: function (src, context) {
+                        return context + '\r\n' + '## Hello grunt-md-html';
                     },
-                    afterCompile: function (htmlContent) {
-                        return htmlContent.replace('grunt-md-html', 'helinjiang');
+                    afterCompile: function (src, context) {
+                        return context.replace('grunt-md-html', 'helinjiang');
                     }
                 },
                 files: {
-                    'tmp/before_after_compile/some.html': ['test/fixtures/before_after_compile/some.md']
+                    'tmp/before_after_compile/some.html': ['test/fixtures/before_after_compile/some.md'],
+                    'tmp/before_after_compile/some2.html': ['test/fixtures/before_after_compile/some2.md', 'test/fixtures/before_after_compile/some3.md']
                 }
             }
         },

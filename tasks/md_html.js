@@ -29,7 +29,8 @@ module.exports = function (grunt) {
                 smartypants: false,
                 highlight: true,
                 beforeCompile: null,
-                afterCompile: null
+                afterCompile: null,
+                separator: '\n\n'
             }),
             files = this.files;
 
@@ -43,6 +44,9 @@ module.exports = function (grunt) {
             }
 
             options.renderer = renderer;
+        } else {
+            // 注意这里一定要记得设置，不然的话，后续的renderer可能会被继承下去
+            options.renderer = new marked.Renderer();
         }
 
         // install highlight.js
@@ -76,18 +80,31 @@ module.exports = function (grunt) {
                     return next(err);
                 }
 
+                // sources和contents 都为数组！！如果配置了 'some2.html': ['some2.md', 'some3.md'] 这样的参数，则该数组就有两个元素了。
+
                 // before compile
                 if (typeof options.beforeCompile === "function") {
-                    // 默认为二进制，但为了对内容进一步操作，这里需要先转义为utf8
-                    contents = iconv.decode(contents, 'utf8');
-                    var newContents = options.beforeCompile(contents);
+                    var cLength = contents.length,
+                        combineArr = [],
+                        combineContent,
+                        newContents;
+
+                    // 依次从数组中获取二进制码，进行转义utf8格式
+                    contents.forEach(function (item) {
+                        combineArr.push(iconv.decode(item, 'utf8'));
+                    });
+
+                    // 然后合并
+                    combineContent = combineArr.join(options.separator);
+
+                    // 接着再调用beforeCompile，只有在有结果返回时，才生效
+                    newContents = options.beforeCompile(cLength > 1 ? sources : sources[0], combineContent);
                     if (newContents) {
-                        contents = newContents;
+                        combineContent = newContents;
                     }
 
-                    // 转换完成之后，要再转换回来
-                    // TODO 此处可优化
-                    contents = [new Buffer(contents)];
+                    // 最后将修改之后的utf8内容还原为二进制。注意此处不需要再进行拆分了，反正后面也是合并的
+                    contents = [new Buffer(combineContent)];
                 }
 
                 // compile
@@ -95,7 +112,7 @@ module.exports = function (grunt) {
 
                 // after compile
                 if (typeof options.afterCompile === "function") {
-                    var newMarkedContent = options.afterCompile(markedContents);
+                    var newMarkedContent = options.afterCompile(destination, markedContents);
                     if (newMarkedContent) {
                         markedContents = newMarkedContent;
                     }

@@ -41,11 +41,11 @@ exports.md_html = {
 
         var actual = grunt.file.read('tmp/files_array_format/some.html');
         var expected = grunt.file.read('test/expected/files_array_format/some.html');
-        test.equal(grunt.util.normalizelf(actual), grunt.util.normalizelf(expected), 'files_array_format.');
+        test.equal(grunt.util.normalizelf(actual), grunt.util.normalizelf(expected), 'files_array_format some.html.');
 
         actual = grunt.file.read('tmp/files_array_format/parent.some.html');
         expected = grunt.file.read('test/expected/files_array_format/parent.some.html');
-        test.equal(grunt.util.normalizelf(actual), grunt.util.normalizelf(expected), 'files_array_format.');
+        test.equal(grunt.util.normalizelf(actual), grunt.util.normalizelf(expected), 'files_array_format parent.some.html.');
 
         test.done();
     },
@@ -59,11 +59,15 @@ exports.md_html = {
         test.done();
     },
     before_after_compile: function (test) {
-        test.expect(1);
+        test.expect(2);
 
         var actual = grunt.file.read('tmp/before_after_compile/some.html');
         var expected = grunt.file.read('test/expected/before_after_compile/some.html');
-        test.equal(grunt.util.normalizelf(actual), grunt.util.normalizelf(expected), 'before_after_compile.');
+        test.equal(grunt.util.normalizelf(actual), grunt.util.normalizelf(expected), 'before_after_compile some.html.');
+
+        actual = grunt.file.read('tmp/before_after_compile/some2.html');
+        expected = grunt.file.read('test/expected/before_after_compile/some2.html');
+        test.equal(grunt.util.normalizelf(actual), grunt.util.normalizelf(expected), 'before_after_compile some2.html.');
 
         test.done();
     }
