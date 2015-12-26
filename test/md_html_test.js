@@ -31,8 +31,21 @@ exports.md_html = {
     test.expect(1);
 
     var actual = grunt.file.read('tmp/default_options/some.html');
-    var expected = grunt.file.read('test/expected/some.html');
-    test.equal(grunt.util.normalizelf(actual), grunt.util.normalizelf(expected), 'should describe what the default behavior is.');
+    var expected = grunt.file.read('test/expected/default_options/some.html');
+    test.equal(grunt.util.normalizelf(actual), grunt.util.normalizelf(expected), 'default_options.');
+
+    test.done();
+  },
+  files_array_format: function(test) {
+    test.expect(2);
+
+    var actual = grunt.file.read('tmp/files_array_format/some.html');
+    var expected = grunt.file.read('test/expected/files_array_format/some.html');
+    test.equal(grunt.util.normalizelf(actual), grunt.util.normalizelf(expected), 'files_array_format.');
+
+    actual = grunt.file.read('tmp/files_array_format/parent.some.html');
+    expected = grunt.file.read('test/expected/files_array_format/parent.some.html');
+    test.equal(grunt.util.normalizelf(actual), grunt.util.normalizelf(expected), 'files_array_format.');
 
     test.done();
   }
