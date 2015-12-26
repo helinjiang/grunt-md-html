@@ -57,5 +57,14 @@ exports.md_html = {
         test.equal(grunt.util.normalizelf(actual), grunt.util.normalizelf(expected), 'custom_renderer.');
 
         test.done();
+    },
+    before_after_compile: function (test) {
+        test.expect(1);
+
+        var actual = grunt.file.read('tmp/before_after_compile/some.html');
+        var expected = grunt.file.read('test/expected/before_after_compile/some.html');
+        test.equal(grunt.util.normalizelf(actual), grunt.util.normalizelf(expected), 'before_after_compile.');
+
+        test.done();
     }
 };

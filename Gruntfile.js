@@ -64,6 +64,19 @@ module.exports = function (grunt) {
                 files: {
                     'tmp/custom_renderer/some.html': ['test/fixtures/custom_renderer/some.md']
                 }
+            },
+            before_after_compile: {
+                options: {
+                    beforeCompile: function (mdContent) {
+                        return mdContent + '\r\n' + '## Hello grunt-md-html';
+                    },
+                    afterCompile: function (htmlContent) {
+                        return htmlContent.replace('grunt-md-html', 'helinjiang');
+                    }
+                },
+                files: {
+                    'tmp/before_after_compile/some.html': ['test/fixtures/before_after_compile/some.md']
+                }
             }
         },
 

@@ -14,7 +14,8 @@ module.exports = function (grunt) {
         async = require('async'),
         fs = require('fs'),
         os = require('os'),
-        util = require('util');
+        util = require('util'),
+        iconv = require('iconv-lite');
 
     grunt.registerMultiTask('md_html', 'Convert markdown and HTML to each other.', function () {
         var done = this.async(),
@@ -26,7 +27,9 @@ module.exports = function (grunt) {
                 sanitize: true,
                 smartLists: true,
                 smartypants: false,
-                highlight: true
+                highlight: true,
+                beforeCompile: null,
+                afterCompile: null
             }),
             files = this.files;
 
@@ -73,7 +76,32 @@ module.exports = function (grunt) {
                     return next(err);
                 }
 
-                grunt.file.write(destination, marked(contents.join(os.EOL)));
+                // before compile
+                if (typeof options.beforeCompile === "function") {
+                    // 默认为二进制，但为了对内容进一步操作，这里需要先转义为utf8
+                    contents = iconv.decode(contents, 'utf8');
+                    var newContents = options.beforeCompile(contents);
+                    if (newContents) {
+                        contents = newContents;
+                    }
+
+                    // 转换完成之后，要再转换回来
+                    // TODO 此处可优化
+                    contents = [new Buffer(contents)];
+                }
+
+                // compile
+                var markedContents = marked(contents.join(os.EOL));
+
+                // after compile
+                if (typeof options.afterCompile === "function") {
+                    var newMarkedContent = options.afterCompile(markedContents);
+                    if (newMarkedContent) {
+                        markedContents = newMarkedContent;
+                    }
+                }
+
+                grunt.file.write(destination, markedContents);
                 grunt.verbose.writeln(util.format('Successfully rendered markdown to "%s"', destination));
                 next();
             });
