@@ -8,35 +8,43 @@
 
 'use strict';
 
-module.exports = function(grunt) {
+module.exports = function (grunt) {
 
     var marked = require('marked'),
-        async  = require('async'),
-        fs     = require('fs'),
-        os     = require('os'),
-        util   = require('util');
+        async = require('async'),
+        fs = require('fs'),
+        os = require('os'),
+        util = require('util');
 
-  grunt.registerMultiTask('md_html', 'Convert markdown and HTML to each other.', function() {
-        var done    = this.async(),
+    grunt.registerMultiTask('md_html', 'Convert markdown and HTML to each other.', function () {
+        var done = this.async(),
             options = this.options({
-                gfm:         true,
-                tables:      true,
-                breaks:      false,
-                pedantic:    false,
-                sanitize:    true,
-                smartLists:  true,
+                gfm: true,
+                tables: true,
+                breaks: false,
+                pedantic: false,
+                sanitize: true,
+                smartLists: true,
                 smartypants: false,
-                highlight:   true
+                highlight: true
             }),
             files = this.files;
 
-        if (!options.renderer) {
-          options.renderer = new marked.Renderer();
+        var renderer;
+        if (options.renderer) {
+            renderer = new marked.Renderer();
+            for (var prop in options.renderer) {
+                if (options.renderer.hasOwnProperty(prop)) {
+                    renderer[prop] = options.renderer[prop];
+                }
+            }
+
+            options.renderer = renderer;
         }
 
         // install highlight.js
         if (options.highlight) {
-            options.highlight = (function(highlight) {
+            options.highlight = (function (highlight) {
                 return function (code) {
                     return highlight.highlightAuto(code).value;
                 };
@@ -45,12 +53,12 @@ module.exports = function(grunt) {
 
         marked.setOptions(options);
 
-        async.each(files, function(file, next) {
+        async.each(files, function (file, next) {
             var sources, destination;
 
             destination = file.dest;
 
-            sources = file.src.filter(function(path) {
+            sources = file.src.filter(function (path) {
                 if (!fs.existsSync(path)) {
                     grunt.log.warn(util.format('Source file "%s" is not found', path));
                     return false;
@@ -59,7 +67,7 @@ module.exports = function(grunt) {
                 return true;
             });
 
-            async.map(sources, fs.readFile, function(err, contents) {
+            async.map(sources, fs.readFile, function (err, contents) {
                 if (err) {
                     grunt.log.error(util.format('Could not read files "%s"', sources.join(', ')));
                     return next(err);
@@ -70,9 +78,9 @@ module.exports = function(grunt) {
                 next();
             });
 
-        }, function() {
-          grunt.log.ok(files.length + ' ' + grunt.util.pluralize(files.length, 'file/files') + ' created.');
-          done();
+        }, function () {
+            grunt.log.ok(files.length + ' ' + grunt.util.pluralize(files.length, 'file/files') + ' created.');
+            done();
         });
     });
 

@@ -42,8 +42,28 @@ module.exports = function (grunt) {
                     src: ['**/*.md'],
                     dest: 'tmp/files_array_format/',
                     ext: '.html',
-                    extDot:'last'
+                    extDot: 'last'
                 }]
+            },
+            custom_renderer: {
+                options: {
+                    renderer: {
+                        heading: function (text, level) {
+
+                            var escapedText = text.toLowerCase().replace(/[^\w]+/g, '-');
+
+                            return '<h' + level + '><a name="' +
+                                escapedText +
+                                '" class="anchor" href="#' +
+                                escapedText +
+                                '"><span class="header-link"></span></a>' +
+                                text + '</h' + level + '>';
+                        }
+                    }
+                },
+                files: {
+                    'tmp/custom_renderer/some.html': ['test/fixtures/custom_renderer/some.md']
+                }
             }
         },
 
