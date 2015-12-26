@@ -10,41 +10,70 @@
 
 module.exports = function(grunt) {
 
-  // Please see the Grunt documentation for more information regarding task
-  // creation: http://gruntjs.com/creating-tasks
+    var marked = require('marked'),
+        async  = require('async'),
+        fs     = require('fs'),
+        os     = require('os'),
+        util   = require('util');
 
   grunt.registerMultiTask('md_html', 'Convert markdown and HTML to each other.', function() {
-    // Merge task-specific and/or target-specific options with these defaults.
-    var options = this.options({
-      punctuation: '.',
-      separator: ', '
-    });
+        var done    = this.async(),
+            options = this.options({
+                gfm:         true,
+                tables:      true,
+                breaks:      false,
+                pedantic:    false,
+                sanitize:    true,
+                smartLists:  true,
+                smartypants: false,
+                highlight:   true
+            }),
+            files = this.files;
 
-    // Iterate over all specified file groups.
-    this.files.forEach(function(f) {
-      // Concat specified files.
-      var src = f.src.filter(function(filepath) {
-        // Warn on and remove invalid source files (if nonull was set).
-        if (!grunt.file.exists(filepath)) {
-          grunt.log.warn('Source file "' + filepath + '" not found.');
-          return false;
-        } else {
-          return true;
+        if (!options.renderer) {
+          options.renderer = new marked.Renderer();
         }
-      }).map(function(filepath) {
-        // Read file source.
-        return grunt.file.read(filepath);
-      }).join(grunt.util.normalizelf(options.separator));
 
-      // Handle options.
-      src += options.punctuation;
+        // install highlight.js
+        if (options.highlight) {
+            options.highlight = (function(highlight) {
+                return function (code) {
+                    return highlight.highlightAuto(code).value;
+                };
+            })(require('highlight.js'));
+        }
 
-      // Write the destination file.
-      grunt.file.write(f.dest, src);
+        marked.setOptions(options);
 
-      // Print a success message.
-      grunt.log.writeln('File "' + f.dest + '" created.');
+        async.each(files, function(file, next) {
+            var sources, destination;
+
+            destination = file.dest;
+
+            sources = file.src.filter(function(path) {
+                if (!fs.existsSync(path)) {
+                    grunt.log.warn(util.format('Source file "%s" is not found', path));
+                    return false;
+                }
+
+                return true;
+            });
+
+            async.map(sources, fs.readFile, function(err, contents) {
+                if (err) {
+                    grunt.log.error(util.format('Could not read files "%s"', sources.join(', ')));
+                    return next(err);
+                }
+
+                grunt.file.write(destination, marked(contents.join(os.EOL)));
+                grunt.verbose.writeln(util.format('Successfully rendered markdown to "%s"', destination));
+                next();
+            });
+
+        }, function() {
+          grunt.log.ok(files.length + ' ' + grunt.util.pluralize(files.length, 'file/files') + ' created.');
+          done();
+        });
     });
-  });
 
 };

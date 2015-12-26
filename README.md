@@ -37,47 +37,58 @@ grunt.initConfig({
 
 ### Options
 
-#### options.separator
-Type: `String`
-Default value: `',  '`
+Grunt-md-html forked [Grunt-marked](https://github.com/gobwas/grunt-marked) and uses the [default marked parser options](https://github.com/chjj/marked). But, it extended!
 
-A string value that is used to do something with whatever.
+#### options.highlight
+Type: `Boolean`
+Default value: `TRUE`
 
-#### options.punctuation
-Type: `String`
-Default value: `'.'`
+A boolean flag that shows, use [highlight.js](https://github.com/isagalaev/highlight.js) plugin or not to highlight the syntax.
 
-A string value that is used to do something else with whatever else.
+#### options.renderer
+Type: `Object`
+Default value: `marked.Renderer`
+
+Renderer to use.
 
 ### Usage Examples
 
 #### Default Options
-In this example, the default options are used to do something with whatever. So if the `testing` file has the content `Testing` and the `123` file had the content `1 2 3`, the generated result would be `Testing, 1 2 3.`
+In this example, the default options are used to compile markdown files.
 
 ```js
 grunt.initConfig({
   md_html: {
     options: {},
     files: {
-      'dest/default_options': ['src/testing', 'src/123'],
+      'dest/my.html': ['src/my.md', 'src/header.md'],
     },
   },
 });
 ```
 
 #### Custom Options
-In this example, custom options are used to do something else with whatever else. So if the `testing` file has the content `Testing` and the `123` file had the content `1 2 3`, the generated result in this case would be `Testing: 1 2 3 !!!`
+In this example, custom options are used to compile markdown files.
 
 ```js
 grunt.initConfig({
   md_html: {
     options: {
-      separator: ': ',
-      punctuation: ' !!!',
+      highlight: false,
+      gfm: true,
+      tables: true,
+      breaks: false,
+      pedantic: false,
+      sanitize: true,
+      smartLists: true,
+      smartypants: false
     },
-    files: {
-      'dest/default_options': ['src/testing', 'src/123'],
-    },
+    dist: {
+      files: {
+        'dest/my.html': 'src/my.md',
+        'dest/some.html': 'src/some.md'
+      }
+    }
   },
 });
 ```
@@ -86,4 +97,7 @@ grunt.initConfig({
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com/).
 
 ## Release History
-_(Nothing yet)_
+
+* 2015-12-26   v0.0.2   Fork [grunt-marked](https://github.com/gobwas/grunt-marked).
+
+* 2015-12-26   v0.0.1   Initial release.
