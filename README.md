@@ -81,6 +81,42 @@ Default value: `\n\n`
 
 A string value that is used to concatenate the .md files if used in one-outputfile mode.
 
+#### options.layout
+Type: `String`
+Default value: `null`
+
+A path to a layout file: A Layout file defines the global surrounding layout, e.g. an HTML header / footer. Within the Layout file you can then include the actual processed .md-file content.
+
+```
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+    </head>
+    <body>
+        <%= DOC %>
+    </body>
+</html>
+```
+
+This layout file adds an HTML skeleton around each processed output file, replacing the following template strings (the processed content):
+
+- `DOC`: the content html contents of which .md converted
+- `SRC`: the source file path
+- `DEST`: the destination file path
+
+#### options.templateData
+Type: `Object`
+Default value: `{}`
+
+Additional data which is passed to the template engine before the .md file is processed. The data object's content is directly available as template vars / functions. See Usage Examples for more information.
+
+#### options.beautify
+Type: `Boolean`
+Default value: `false`
+
+Beautify the result by [js-beautify](https://www.npmjs.com/package/js-beautify).
+
 ### Usage Examples
 
 #### Default Options
@@ -128,11 +164,33 @@ grunt.initConfig({
 });
 ```
 
+#### Use layout
+Layout support.
+
+```js
+grunt.initConfig({
+  md_html: {
+    options: {
+        layout: 'test/fixtures/layout/layout.html',
+        beautify: true,
+        templateData: {
+            mykey: 'hello world!'
+        }
+    },
+    files: {
+        'tmp/layout/some.html': ['test/fixtures/layout/some.md'],
+    }
+  },
+});
+```
+
 
 ## Contributing
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com/).
 
 ## Release History
+* 2015-12-27   v1.1.0   Support `options.layout` `options.templateData` and `options.beautify`.
+
 * 2015-12-27   v1.0.0   Change some api.
 
 * 2015-12-26   v0.0.2   Fork [grunt-marked](https://github.com/gobwas/grunt-marked).

@@ -48,7 +48,7 @@ module.exports = function (grunt) {
             custom_renderer: {
                 options: {
                     markedOptions: {
-                        highlight : false,
+                        highlight: false,
                         renderer: {
                             heading: function (text, level) {
 
@@ -80,6 +80,18 @@ module.exports = function (grunt) {
                 files: {
                     'tmp/before_after_compile/some.html': ['test/fixtures/before_after_compile/some.md'],
                     'tmp/before_after_compile/some2.html': ['test/fixtures/before_after_compile/some2.md', 'test/fixtures/before_after_compile/some3.md']
+                }
+            },
+            layout: {
+                options: {
+                    layout: 'test/fixtures/layout/layout.html',
+                    beautify: true,
+                    templateData: {
+                        mykey: 'hello world!'
+                    }
+                },
+                files: {
+                    'tmp/layout/some.html': ['test/fixtures/layout/some.md'],
                 }
             }
         },

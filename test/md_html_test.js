@@ -70,5 +70,14 @@ exports.md_html = {
         test.equal(grunt.util.normalizelf(actual), grunt.util.normalizelf(expected), 'before_after_compile some2.html.');
 
         test.done();
+    },
+    layout: function (test) {
+        test.expect(1);
+
+        var actual = grunt.file.read('tmp/layout/some.html');
+        var expected = grunt.file.read('test/expected/layout/some.html');
+        test.equal(grunt.util.normalizelf(actual), grunt.util.normalizelf(expected), 'layout.');
+
+        test.done();
     }
 };

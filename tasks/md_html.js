@@ -17,6 +17,8 @@ module.exports = function (grunt) {
         util = require('util'),
         iconv = require('iconv-lite');
 
+    var beautify = require('js-beautify');
+
     var _ = require('lodash');
 
     grunt.registerMultiTask('md_html', 'Convert markdown and HTML to each other.', function () {
@@ -34,14 +36,17 @@ module.exports = function (grunt) {
             },
             options = this.options({
                 markedOptions: defaultMarkedOptions,
+                layout: null, // 输出文件的html模版文件 TODO 后期可以支持字符串？
+                templateData: {},
+                beautify: false,
                 beforeCompile: null,
                 afterCompile: null,
                 separator: '\n\n'
             }),
-            files = this.files;
-
-        // 注意 markedOptions 要单独设置一下，否则
-        var markedOptions = _.assign({}, defaultMarkedOptions, options.markedOptions);
+            files = this.files,
+            markedOptions = _.assign({}, defaultMarkedOptions, options.markedOptions), //注意 markedOptions 要单独设置一下，否则this.options无法覆盖
+            layoutFile = options.layout,
+            layoutContent;
 
         // 注意要对options.markedOptions.renderer做一些特殊处理，要将这里的方法首先new之后再挂载
         if (markedOptions.renderer) {
@@ -61,6 +66,12 @@ module.exports = function (grunt) {
         }
 
         marked.setOptions(markedOptions);
+
+        // 如果用到了输出模版
+        if (layoutFile && grunt.file.exists(layoutFile)) {
+            grunt.log.writeln('Using layout file: ' + layoutFile);
+            layoutContent = grunt.file.read(layoutFile);
+        }
 
         async.each(files, function (file, next) {
             var sources, destination;
@@ -84,10 +95,12 @@ module.exports = function (grunt) {
 
                 // sources和contents 都为数组！！如果配置了 'some2.html': ['some2.md', 'some3.md'] 这样的参数，则该数组就有两个元素了。
 
+                var cLength = contents.length,
+                    sourceSrc = cLength > 1 ? sources : sources[0];
+
                 // before compile
                 if (typeof options.beforeCompile === "function") {
-                    var cLength = contents.length,
-                        combineArr = [],
+                    var combineArr = [],
                         combineContent,
                         newContents;
 
@@ -100,7 +113,7 @@ module.exports = function (grunt) {
                     combineContent = combineArr.join(options.separator);
 
                     // 接着再调用beforeCompile，只有在有结果返回时，才生效
-                    newContents = options.beforeCompile(cLength > 1 ? sources : sources[0], combineContent);
+                    newContents = options.beforeCompile(sourceSrc, combineContent);
                     if (newContents) {
                         combineContent = newContents;
                     }
@@ -120,7 +133,29 @@ module.exports = function (grunt) {
                     }
                 }
 
-                grunt.file.write(destination, markedContents);
+                options.templateData.SRC = sourceSrc;
+                options.templateData.DEST = destination;
+                options.templateData.DOC = markedContents;
+
+                var layoutHtml = layoutContent;
+
+                // Check if we have to wrap a layout:
+                if (!layoutHtml) {
+                    layoutHtml = '{DOC}';
+                }
+
+                layoutHtml = grunt.template.process(layoutHtml, {data: options.templateData});
+
+                layoutHtml = layoutHtml.replace(/\{DOC\}/g, options.templateData.DOC);
+                layoutHtml = layoutHtml.replace(/\{SRC\}/g, options.templateData.SRC);
+                layoutHtml = layoutHtml.replace(/\{DEST\}/g, options.templateData.DEST);
+
+                // 如果要美化html的话
+                if (options.beautify) {
+                    layoutHtml = beautify.html(layoutHtml);
+                }
+
+                grunt.file.write(destination, layoutHtml);
                 grunt.verbose.writeln(util.format('Successfully rendered markdown to "%s"', destination));
                 next();
             });
