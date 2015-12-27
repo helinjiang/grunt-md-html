@@ -17,9 +17,11 @@ module.exports = function (grunt) {
         util = require('util'),
         iconv = require('iconv-lite');
 
+    var _ = require('lodash');
+
     grunt.registerMultiTask('md_html', 'Convert markdown and HTML to each other.', function () {
         var done = this.async(),
-            options = this.options({
+            defaultMarkedOptions = {
                 gfm: true,
                 tables: true,
                 breaks: false,
@@ -28,37 +30,37 @@ module.exports = function (grunt) {
                 smartLists: true,
                 smartypants: false,
                 highlight: true,
+                renderer: null
+            },
+            options = this.options({
+                markedOptions: defaultMarkedOptions,
                 beforeCompile: null,
                 afterCompile: null,
                 separator: '\n\n'
             }),
             files = this.files;
 
-        var renderer;
-        if (options.renderer) {
-            renderer = new marked.Renderer();
-            for (var prop in options.renderer) {
-                if (options.renderer.hasOwnProperty(prop)) {
-                    renderer[prop] = options.renderer[prop];
-                }
-            }
+        // 注意 markedOptions 要单独设置一下，否则
+        var markedOptions = _.assign({}, defaultMarkedOptions, options.markedOptions);
 
-            options.renderer = renderer;
+        // 注意要对options.markedOptions.renderer做一些特殊处理，要将这里的方法首先new之后再挂载
+        if (markedOptions.renderer) {
+            markedOptions.renderer = _.assign(new marked.Renderer(), markedOptions.renderer);
         } else {
             // 注意这里一定要记得设置，不然的话，后续的renderer可能会被继承下去
-            options.renderer = new marked.Renderer();
+            markedOptions.renderer = new marked.Renderer();
         }
 
         // install highlight.js
-        if (options.highlight) {
-            options.highlight = (function (highlight) {
+        if (markedOptions.highlight) {
+            markedOptions.highlight = (function (highlight) {
                 return function (code) {
                     return highlight.highlightAuto(code).value;
                 };
             })(require('highlight.js'));
         }
 
-        marked.setOptions(options);
+        marked.setOptions(markedOptions);
 
         async.each(files, function (file, next) {
             var sources, destination;

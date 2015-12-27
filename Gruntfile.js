@@ -47,17 +47,20 @@ module.exports = function (grunt) {
             },
             custom_renderer: {
                 options: {
-                    renderer: {
-                        heading: function (text, level) {
+                    markedOptions: {
+                        highlight : false,
+                        renderer: {
+                            heading: function (text, level) {
 
-                            var escapedText = text.toLowerCase().replace(/[^\w]+/g, '-');
+                                var escapedText = text.toLowerCase().replace(/[^\w]+/g, '-');
 
-                            return '<h' + level + '><a name="' +
-                                escapedText +
-                                '" class="anchor" href="#' +
-                                escapedText +
-                                '"><span class="header-link"></span></a>' +
-                                text + '</h' + level + '>';
+                                return '<h' + level + '><a name="' +
+                                    escapedText +
+                                    '" class="anchor" href="#' +
+                                    escapedText +
+                                    '"><span class="header-link"></span></a>' +
+                                    text + '</h' + level + '>';
+                            }
                         }
                     }
                 },
