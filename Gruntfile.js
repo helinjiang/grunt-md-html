@@ -91,7 +91,43 @@ module.exports = function (grunt) {
                     }
                 },
                 files: {
-                    'tmp/layout/some.html': ['test/fixtures/layout/some.md'],
+                    'tmp/layout/some.html': ['test/fixtures/layout/some.md']
+                }
+            },
+            layout_api: {
+                options: {
+                    layout: 'test/fixtures/layout_api/layout.html',
+                    beautify: true,
+                    templateData: {
+                        mykey: 'hello world!'
+                    },
+                    beforeCompile: function (src, context) {
+                        var reg = /<!--([\r\n]*.*(.*[\r\n])*)-->/,
+                            matchResult = context.match(reg),
+                            infoStr,
+                            arr,
+                            map = {};
+
+                        if (matchResult) {
+                            infoStr = matchResult[1];
+                            arr = infoStr.split('\r\n');
+                            arr.forEach(function (item) {
+                                if (!!item) {
+                                    var tArr = item.split(':');
+                                    if (tArr.length > 1) {
+                                        map[tArr[0].trim()] = tArr[1].trim();
+                                    }
+                                }
+                            });
+
+                            console.log(map);
+                        }
+
+                        return context.replace(reg, '');
+                    }
+                },
+                files: {
+                    'tmp/layout/some.html': ['test/fixtures/layout_api/some.md']
                 }
             }
         },
