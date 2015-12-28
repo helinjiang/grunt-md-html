@@ -8,6 +8,8 @@
 
 'use strict';
 
+var _ = require('lodash');
+
 module.exports = function (grunt) {
 
     // Project configuration.
@@ -99,35 +101,48 @@ module.exports = function (grunt) {
                     layout: 'test/fixtures/layout_api/layout.html',
                     beautify: true,
                     templateData: {
-                        mykey: 'hello world!'
+                        mykey: 'hello world!',
+                        FILE_NAME: 'myfilename.html'
                     },
                     beforeCompile: function (src, context) {
                         var reg = /<!--([\r\n]*.*(.*[\r\n])*)-->/,
                             matchResult = context.match(reg),
-                            infoStr,
-                            arr,
-                            map = {};
+                            data = {
+                                title: '',
+                                date: 's',
+                                otheer: 'aa'
+                            },
+                            map = {},
+                            arr;
 
                         if (matchResult) {
-                            infoStr = matchResult[1];
-                            arr = infoStr.split('\r\n');
-                            arr.forEach(function (item) {
-                                if (!!item) {
-                                    var tArr = item.split(':');
-                                    if (tArr.length > 1) {
-                                        map[tArr[0].trim()] = tArr[1].trim();
-                                    }
+                            arr = matchResult[1].split('\r\n');
+                            for (var i = 0, length = arr.length; i < length; i++) {
+                                if (!arr[i]) {
+                                    continue;
                                 }
-                            });
 
-                            console.log(map);
+                                var tArr = arr[i].split(':');
+                                if (tArr.length > 1) {
+                                    map[tArr[0].trim()] = tArr[1].trim();
+                                }
+                            }
+
+                            this.templateData = _.assign(data, this.templateData, map);
+
+                            // 是否自定义文件输出名
+                            if (this.templateData.title) {
+                                this.templateData.FILE_NAME = this.templateData.title.replace('.', '_') + '.html';
+                            }
+
+                            //console.log(this.templateData);
                         }
 
                         return context.replace(reg, '');
                     }
                 },
                 files: {
-                    'tmp/layout/some.html': ['test/fixtures/layout_api/some.md']
+                    'tmp/layout_api/some.html': ['test/fixtures/layout_api/some.md']
                 }
             }
         },

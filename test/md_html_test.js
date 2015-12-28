@@ -79,5 +79,14 @@ exports.md_html = {
         test.equal(grunt.util.normalizelf(actual), grunt.util.normalizelf(expected), 'layout.');
 
         test.done();
+    },
+    layout_api: function (test) {
+        test.expect(1);
+
+        var actual = grunt.file.read('tmp/layout_api/Object_prototype.html');
+        var expected = grunt.file.read('test/expected/layout_api/Object_prototype.html');
+        test.equal(grunt.util.normalizelf(actual), grunt.util.normalizelf(expected), 'layout_api.');
+
+        test.done();
     }
 };

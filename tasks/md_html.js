@@ -17,9 +17,15 @@ module.exports = function (grunt) {
         util = require('util'),
         iconv = require('iconv-lite');
 
+    var path = require('path');
+
     var beautify = require('js-beautify');
 
     var _ = require('lodash');
+
+    var s = require("underscore.string");
+
+    _.mixin(s.exports());
 
     grunt.registerMultiTask('md_html', 'Convert markdown and HTML to each other.', function () {
         var done = this.async(),
@@ -153,6 +159,21 @@ module.exports = function (grunt) {
                 // 如果要美化html的话
                 if (options.beautify) {
                     layoutHtml = beautify.html(layoutHtml);
+                }
+
+                // 如果有自定义输出的文件名，则使用之
+                if (options.templateData.FILE_NAME) {
+                    // TODO 如果FILE_NAME不是合格的文件名则要转换或舍弃
+                    //var saveFileExt = path.extname(options.templateData.FILE_NAME),
+                    //    saveFileBase = path.basename(options.templateData.FILE_NAME, saveFileExt),
+                    //    saveFileName = _.camelize(_.slugify(_.humanize(saveFileBase))) + saveFileExt;
+                    //    saveFileName = saveFileBase + saveFileExt;
+                    //if (saveFileName !== options.templateData.FILE_NAME) {
+                    //    grunt.log.warn(util.format('saveFileName(%s) is different from FILE_NAME(%s)', saveFileName, options.templateData.FILE_NAME));
+                    //}
+
+                    // TODO 此处需要考虑一下如果fileName无后缀的场景
+                    destination = path.join(path.dirname(destination), options.templateData.FILE_NAME);
                 }
 
                 grunt.file.write(destination, layoutHtml);

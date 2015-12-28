@@ -111,6 +111,8 @@ Default value: `{}`
 
 Additional data which is passed to the template engine before the .md file is processed. The data object's content is directly available as template vars / functions. See Usage Examples for more information.
 
+If you define `options.templateData.FILE_NAME`, then you will get file which will rename it!
+
 #### options.beautify
 Type: `Boolean`
 Default value: `false`
@@ -189,6 +191,8 @@ grunt.initConfig({
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com/).
 
 ## Release History
+* 2015-12-28   v1.1.1   Support `options.templateData.FILE_NAME`.
+
 * 2015-12-27   v1.1.0   Support `options.layout` `options.templateData` and `options.beautify`.
 
 * 2015-12-27   v1.0.0   Change some api.
